@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 220">
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="40%" r="55%">
+      <stop offset="0%" stop-color="#2d1a5e"/>
+      <stop offset="100%" stop-color="#050816"/>
+    </radialGradient>
+    <radialGradient id="skin" cx="50%" cy="40%" r="60%">
+      <stop offset="0%" stop-color="#f5c9a0"/>
+      <stop offset="100%" stop-color="#e8a870"/>
+    </radialGradient>
+    <radialGradient id="glow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#915EFF" stop-opacity="0.4"/>
+      <stop offset="100%" stop-color="#915EFF" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <!-- Background -->
+  <circle cx="110" cy="110" r="110" fill="url(#bg)"/>
+  <circle cx="110" cy="110" r="110" fill="url(#glow)"/>
+  <!-- Body / hoodie (orange) -->
+  <ellipse cx="110" cy="195" rx="62" ry="45" fill="#E07820"/>
+  <ellipse cx="110" cy="175" rx="52" ry="38" fill="#CC6A10"/>
+  <!-- Neck -->
+  <rect x="97" y="130" width="26" height="28" rx="5" fill="url(#skin)"/>
+  <!-- Head -->
+  <ellipse cx="110" cy="108" rx="48" ry="52" fill="url(#skin)"/>
+  <!-- Hair (dark brown, spiky) -->
+  <ellipse cx="110" cy="70" rx="48" ry="22" fill="#3d2b1f"/>
+  <path d="M65 80 Q70 50 80 60 Q85 35 95 55 Q100 30 110 52 Q120 28 128 54 Q138 34 143 58 Q155 48 152 72" fill="#3d2b1f" stroke="#3d2b1f" stroke-width="2"/>
+  <path d="M68 85 Q62 60 72 55" fill="#4a3528" stroke="none"/>
+  <path d="M150 82 Q158 58 148 53" fill="#4a3528" stroke="none"/>
+  <!-- Ears -->
+  <ellipse cx="63" cy="108" rx="8" ry="10" fill="#e8a870"/>
+  <ellipse cx="157" cy="108" rx="8" ry="10" fill="#e8a870"/>
+  <!-- Eyes -->
+  <ellipse cx="92" cy="108" rx="13" ry="13" fill="white"/>
+  <ellipse cx="128" cy="108" rx="13" ry="13" fill="white"/>
+  <ellipse cx="93" cy="109" rx="8" ry="8" fill="#7a4a20"/>
+  <ellipse cx="129" cy="109" rx="8" ry="8" fill="#7a4a20"/>
+  <ellipse cx="94" cy="108" rx="5" ry="5" fill="#1a0d00"/>
+  <ellipse cx="130" cy="108" rx="5" ry="5" fill="#1a0d00"/>
+  <!-- Eye shine -->
+  <ellipse cx="96" cy="106" rx="2" ry="2" fill="white"/>
+  <ellipse cx="132" cy="106" rx="2" ry="2" fill="white"/>
+  <!-- Glasses frame -->
+  <rect x="78" y="97" width="30" height="24" rx="7" fill="none" stroke="#2d1a0a" stroke-width="3"/>
+  <rect x="112" y="97" width="30" height="24" rx="7" fill="none" stroke="#2d1a0a" stroke-width="3"/>
+  <line x1="108" y1="109" x2="112" y2="109" stroke="#2d1a0a" stroke-width="3"/>
+  <line x1="78" y1="109" x2="72" y2="107" stroke="#2d1a0a" stroke-width="2.5"/>
+  <line x1="142" y1="109" x2="148" y2="107" stroke="#2d1a0a" stroke-width="2.5"/>
+  <!-- Eyebrows -->
+  <path d="M79 93 Q93 87 107 93" fill="none" stroke="#3d2b1f" stroke-width="3" stroke-linecap="round"/>
+  <path d="M113 93 Q127 87 141 93" fill="none" stroke="#3d2b1f" stroke-width="3" stroke-linecap="round"/>
+  <!-- Nose -->
+  <ellipse cx="110" cy="122" rx="5" ry="4" fill="#d4905a" opacity="0.6"/>
+  <!-- Smile -->
+  <path d="M96 135 Q110 147 124 135" fill="none" stroke="#c47040" stroke-width="2.5" stroke-linecap="round"/>
+  <!-- Hoodie zipper detail -->
+  <line x1="110" y1="155" x2="110" y2="195" stroke="#a85510" stroke-width="2" opacity="0.6"/>
+</svg>
