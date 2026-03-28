@@ -83,16 +83,16 @@ export default function About() {
             className="lg:col-span-3 space-y-5 text-muted text-sm sm:text-base leading-relaxed"
           >
             <p>
-              I'm a <span className="text-white font-medium">Machine Learning Engineer</span> with 3+ years of hands-on experience building and deploying production AI systems. My work sits at the intersection of NLP research and real-world engineering — transforming unstructured enterprise data into structured intelligence that drives decisions at scale.
+              I'm a <span className="text-white font-medium">Machine Learning Engineer</span> with 3+ years of experience building AI systems that actually work in production. I like the gap between research and shipping — taking ideas from papers and turning them into things that run reliably at scale.
             </p>
             <p>
-              At Cybage Software, I architected end-to-end Python ML pipelines that processed over <span className="text-primary font-medium">120,000 enterprise documents</span> alongside Dynamics 365 CRM text — integrating Azure OpenAI (GPT-4o), RoBERTa classifiers, and spaCy NER into automated workflows. The result: an 8% macro F1 gain and a 30% reduction in manual effort.
+              At Cybage, I built ML pipelines processing <span className="text-primary font-medium">120k+ enterprise documents</span> — pulling together Azure OpenAI (GPT-4o), RoBERTa, and spaCy NER into automated workflows. Cut manual effort by 30% and pushed macro F1 up by 8%.
             </p>
             <p>
-              Beyond NLP, I built <span className="text-secondary font-medium">RAG-powered document Q&A and summarisation</span> pipelines using vector embeddings and structured prompt engineering — cutting turnaround time by 40%. I implemented MLOps best practices via Azure DevOps: model versioning, validation gates, drift detection, and monitoring — reducing deployment failures by 15%.
+              I also built <span className="text-secondary font-medium">RAG-based Q&A and summarisation</span> using vector embeddings and prompt engineering — 40% faster turnaround. Set up CI/CD via Azure DevOps with model versioning and drift detection, which made deployments noticeably less stressful.
             </p>
             <p>
-              Currently pursuing an <span className="text-white font-medium">MSc Applied Artificial Intelligence at the University of Warwick</span>, I continue to push the boundary between research and production, with three peer-reviewed international publications and national-level competition wins to my name.
+              Currently doing my <span className="text-white font-medium">MSc in Applied AI at Warwick</span>. Three published papers at international conferences and a couple of national competition wins along the way.
             </p>
 
             {/* Tech stack quick view */}

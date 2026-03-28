@@ -100,21 +100,27 @@ function ProjectCard({ project, index }) {
           <p className="text-muted text-sm leading-relaxed mb-6">{project.description}</p>
 
           {/* Metrics */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+          <div className={`grid gap-3 mb-6 ${
+            project.metrics.length === 2 ? 'grid-cols-2' :
+            project.metrics.length === 3 ? 'grid-cols-3' :
+            'grid-cols-2 sm:grid-cols-4'
+          }`}>
             {project.metrics.map(m => (
               <div
                 key={m.label}
                 className={`rounded-xl p-3 text-center ${
                   project.color === 'purple'
-                    ? 'bg-primary/08 border border-primary/20'
-                    : 'bg-secondary/06 border border-secondary/15'
+                    ? 'border border-primary/20'
+                    : 'border border-secondary/15'
                 }`}
                 style={{ background: project.color === 'purple' ? 'rgba(145,94,255,0.08)' : 'rgba(0,217,255,0.06)' }}
               >
-                <div className={`font-display font-bold text-base sm:text-lg ${
-                  project.color === 'purple' ? 'text-primary' : 'text-secondary'
-                }`}>{m.value}</div>
-                <div className="text-muted text-[10px] mt-0.5 leading-tight">{m.label}</div>
+                <div className={`font-display font-bold leading-tight ${
+                  m.value.length > 5 ? 'text-sm sm:text-base' : 'text-base sm:text-lg'
+                } ${project.color === 'purple' ? 'text-primary' : 'text-secondary'}`}>
+                  {m.value}
+                </div>
+                <div className="text-muted text-[10px] mt-1 leading-snug">{m.label}</div>
               </div>
             ))}
           </div>
