@@ -49,17 +49,18 @@ const Std = ({ color, rough = 0.75, metal = 0, emissive, emissiveIntensity }) =>
 )
 
 /* ══════════════════════════════════════════════════════════════
-   HAIR  — base cap + 7 spiky protrusions
+   HAIR  — base cap + 8 spiky protrusions (more voluminous)
    ══════════════════════════════════════════════════════════════ */
 function Hair() {
   const spikes = [
-    { p: [0,     0.56,  0.02], r: [0,     0,     0    ], h: 0.30 },
-    { p: [0.22,  0.52,  0.05], r: [0.05,  0,     0.38 ], h: 0.24 },
-    { p: [-0.22, 0.52,  0.05], r: [0.05,  0,    -0.38 ], h: 0.24 },
-    { p: [0.10,  0.54, -0.05], r: [-0.12, 0,     0.18 ], h: 0.22 },
-    { p: [-0.10, 0.54, -0.05], r: [-0.12, 0,    -0.18 ], h: 0.22 },
-    { p: [0.32,  0.46,  0.02], r: [0.04,  0,     0.65 ], h: 0.20 },
-    { p: [-0.32, 0.46,  0.02], r: [0.04,  0,    -0.65 ], h: 0.20 },
+    { p: [0,     0.60,  0.04], r: [0,     0,     0    ], h: 0.32 },
+    { p: [0.20,  0.56,  0.06], r: [0.06,  0,     0.35 ], h: 0.26 },
+    { p: [-0.20, 0.56,  0.06], r: [0.06,  0,    -0.35 ], h: 0.26 },
+    { p: [0.10,  0.58, -0.04], r: [-0.14, 0,     0.16 ], h: 0.24 },
+    { p: [-0.10, 0.58, -0.04], r: [-0.14, 0,    -0.16 ], h: 0.24 },
+    { p: [0.34,  0.50,  0.02], r: [0.04,  0,     0.62 ], h: 0.22 },
+    { p: [-0.34, 0.50,  0.02], r: [0.04,  0,    -0.62 ], h: 0.22 },
+    { p: [0,     0.55, -0.18], r: [-0.40, 0,     0    ], h: 0.20 },
   ]
   return (
     <group>
@@ -89,11 +90,11 @@ function Eye({ side, lidRef, pupilRef }) {
   return (
     <group position={[x, 0.05, 0.44]}>
       {/* White sclera */}
-      <Sphere args={[0.098, 22, 18]}>
+      <Sphere args={[0.115, 22, 18]}>
         <Std color={C.white} rough={0.15} />
       </Sphere>
       {/* Iris */}
-      <Sphere args={[0.062, 16, 14]} position={[0, 0, 0.05]}>
+      <Sphere args={[0.074, 16, 14]} position={[0, 0, 0.06]}>
         <Std color={C.iris} />
       </Sphere>
       {/* Pupil — moves with cursor */}
@@ -278,30 +279,30 @@ export default function AvatarCharacter({ mousePos }) {
     /* ── 7. Wave animation ── */
     if (wave.current.active) {
       const wt      = t - wave.current.t0
-      const raising = Math.min(1, wt * 3.5)           // 0→1 in ~0.3 s
+      const raising = Math.min(1, wt * 2.8)   // arm rises over ~0.35 s
 
-      if (wt < 3.8) {
-        // Raise arm toward vertical
+      if (wt < 4.2) {
+        // ① Raise upper arm out to the side — target -1.15 rad (~66° above rest)
         if (rUpperRef.current) {
-          rUpperRef.current.rotation.z = L(rUpperRef.current.rotation.z, -2.25 * raising, 0.12)
-          rUpperRef.current.rotation.x = L(rUpperRef.current.rotation.x,  0.15 * raising, 0.08)
+          rUpperRef.current.rotation.z = L(rUpperRef.current.rotation.z, -1.15 * raising, 0.10)
+          rUpperRef.current.rotation.x = L(rUpperRef.current.rotation.x,  0.10 * raising, 0.08)
         }
-        // Wave forearm once arm is raised
-        if (rLowerRef.current && wt > 0.35) {
-          rLowerRef.current.rotation.z = Math.sin(wt * 7.5) * 0.55 * raising
-          rLowerRef.current.rotation.x = Math.sin(wt * 7.5 + 1) * 0.15 * raising
+        // ② Bend elbow so forearm points upward once arm is raised
+        //    then oscillate forearm left/right for the wave gesture
+        if (rLowerRef.current && wt > 0.3) {
+          const waveOsc = Math.sin(wt * 6.5) * 0.40 * raising  // hand waves
+          rLowerRef.current.rotation.z = L(rLowerRef.current.rotation.z, 1.10 * raising + waveOsc, 0.12)
         }
       } else {
-        // Lower arm back to idle
+        // Lower arm back to natural idle position
         if (rUpperRef.current) {
-          rUpperRef.current.rotation.z = L(rUpperRef.current.rotation.z, -0.44, 0.055)
-          rUpperRef.current.rotation.x = L(rUpperRef.current.rotation.x,  0,    0.055)
+          rUpperRef.current.rotation.z = L(rUpperRef.current.rotation.z, -0.44, 0.05)
+          rUpperRef.current.rotation.x = L(rUpperRef.current.rotation.x,  0,    0.05)
         }
         if (rLowerRef.current) {
-          rLowerRef.current.rotation.z = L(rLowerRef.current.rotation.z, -0.30, 0.055)
-          rLowerRef.current.rotation.x = L(rLowerRef.current.rotation.x,  0,    0.055)
+          rLowerRef.current.rotation.z = L(rLowerRef.current.rotation.z, -0.30, 0.05)
         }
-        if (wt > 5.5) wave.current.active = false
+        if (wt > 6.0) wave.current.active = false
       }
     } else {
       /* Idle arm sway */
@@ -323,9 +324,17 @@ export default function AvatarCharacter({ mousePos }) {
       {/* ══ HEAD GROUP ══════════════════════════════════════ */}
       <group ref={headRef} position={[0, 0.88, 0]}>
 
-        {/* Head sphere */}
-        <Sphere args={[0.50, 36, 28]}>
+        {/* Head sphere — slightly larger for cartoon friendliness */}
+        <Sphere args={[0.52, 36, 28]}>
           <Std color={C.skin} rough={0.75} />
+        </Sphere>
+
+        {/* Cheek blush — soft pink spheres */}
+        <Sphere args={[0.13, 10, 10]} position={[-0.38, -0.06, 0.38]} scale={[1, 0.55, 0.4]}>
+          <meshStandardMaterial color="#f08080" transparent opacity={0.28} roughness={1} />
+        </Sphere>
+        <Sphere args={[0.13, 10, 10]} position={[ 0.38, -0.06, 0.38]} scale={[1, 0.55, 0.4]}>
+          <meshStandardMaterial color="#f08080" transparent opacity={0.28} roughness={1} />
         </Sphere>
 
         <Hair />
@@ -352,9 +361,9 @@ export default function AvatarCharacter({ mousePos }) {
         <group>
           {/* Left */}
           <group position={[-0.185, 0.05, 0.44]}>
-            <Sphere args={[0.098, 22, 18]}><Std color={C.white} rough={0.15} /></Sphere>
-            <Sphere args={[0.062, 16, 14]} position={[0, 0, 0.05]}><Std color={C.iris} /></Sphere>
-            <Sphere ref={lPupilRef} args={[0.036, 10, 10]} position={[0, 0, 0.086]}>
+            <Sphere args={[0.115, 22, 18]}><Std color={C.white} rough={0.15} /></Sphere>
+            <Sphere args={[0.074, 16, 14]} position={[0, 0, 0.06]}><Std color={C.iris} /></Sphere>
+            <Sphere ref={lPupilRef} args={[0.046, 10, 10]} position={[0, 0, 0.10]}>
               <Std color={C.pupil} />
             </Sphere>
             <Sphere args={[0.016, 6, 6]} position={[0.026, 0.032, 0.102]}>
@@ -363,7 +372,7 @@ export default function AvatarCharacter({ mousePos }) {
             {/* Lid — starts open (rx = PI/2 = rotated up/away) */}
             <group ref={lLidRef} rotation={[Math.PI / 2, 0, 0]} position={[0, 0, 0]}>
               <mesh>
-                <sphereGeometry args={[0.106, 22, 10, 0, Math.PI * 2, 0, Math.PI / 2]} />
+                <sphereGeometry args={[0.122, 22, 10, 0, Math.PI * 2, 0, Math.PI / 2]} />
                 <Std color={C.skin} rough={0.8} />
               </mesh>
             </group>
@@ -371,9 +380,9 @@ export default function AvatarCharacter({ mousePos }) {
 
           {/* Right */}
           <group position={[0.185, 0.05, 0.44]}>
-            <Sphere args={[0.098, 22, 18]}><Std color={C.white} rough={0.15} /></Sphere>
-            <Sphere args={[0.062, 16, 14]} position={[0, 0, 0.05]}><Std color={C.iris} /></Sphere>
-            <Sphere ref={rPupilRef} args={[0.036, 10, 10]} position={[0, 0, 0.086]}>
+            <Sphere args={[0.115, 22, 18]}><Std color={C.white} rough={0.15} /></Sphere>
+            <Sphere args={[0.074, 16, 14]} position={[0, 0, 0.06]}><Std color={C.iris} /></Sphere>
+            <Sphere ref={rPupilRef} args={[0.046, 10, 10]} position={[0, 0, 0.10]}>
               <Std color={C.pupil} />
             </Sphere>
             <Sphere args={[0.016, 6, 6]} position={[0.026, 0.032, 0.102]}>
@@ -381,7 +390,7 @@ export default function AvatarCharacter({ mousePos }) {
             </Sphere>
             <group ref={rLidRef} rotation={[Math.PI / 2, 0, 0]} position={[0, 0, 0]}>
               <mesh>
-                <sphereGeometry args={[0.106, 22, 10, 0, Math.PI * 2, 0, Math.PI / 2]} />
+                <sphereGeometry args={[0.122, 22, 10, 0, Math.PI * 2, 0, Math.PI / 2]} />
                 <Std color={C.skin} rough={0.8} />
               </mesh>
             </group>
@@ -396,8 +405,8 @@ export default function AvatarCharacter({ mousePos }) {
         </Sphere>
 
         {/* Smile — arc of torus */}
-        <mesh position={[0, -0.185, 0.465]} rotation={[0, 0, Math.PI]}>
-          <torusGeometry args={[0.105, 0.017, 6, 20, Math.PI * 0.78]} />
+        <mesh position={[0, -0.20, 0.468]} rotation={[0, 0, Math.PI]}>
+          <torusGeometry args={[0.120, 0.020, 6, 24, Math.PI * 0.88]} />
           <Std color={C.smile} rough={0.8} />
         </mesh>
       </group>
