@@ -1,0 +1,267 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ─── Base ─────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html {
+  scroll-behavior: smooth;
+  font-size: 16px;
+}
+
+body {
+  background-color: #050816;
+  color: #ffffff;
+  font-family: 'Inter', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+/* ─── Scrollbar ─────────────────────────────────────────────── */
+::-webkit-scrollbar            { width: 6px; }
+::-webkit-scrollbar-track      { background: #050816; }
+::-webkit-scrollbar-thumb      { background: #915EFF; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover{ background: #7B4FD8; }
+
+/* ─── Glassmorphism card ────────────────────────────────────── */
+.glass-card {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.glass-card-strong {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(145, 94, 255, 0.2);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+/* ─── Gradient text ─────────────────────────────────────────── */
+.gradient-text {
+  background: linear-gradient(135deg, #915EFF 0%, #00d9ff 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.gradient-text-warm {
+  background: linear-gradient(135deg, #ffffff 0%, #aaa6c3 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ─── Shimmer text ──────────────────────────────────────────── */
+.shimmer-text {
+  background: linear-gradient(90deg, #915EFF 0%, #00d9ff 50%, #915EFF 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: shimmer 3s linear infinite;
+}
+
+/* ─── Section layout ────────────────────────────────────────── */
+.section-padding {
+  padding: 5rem 1.5rem;
+}
+
+@media (min-width: 640px)  { .section-padding { padding: 6rem 2rem; } }
+@media (min-width: 1024px) { .section-padding { padding: 7rem 4rem; } }
+@media (min-width: 1280px) { .section-padding { padding: 7rem 6rem; } }
+
+.section-max {
+  max-width: 1280px;
+  margin: 0 auto;
+}
+
+/* ─── Section label ─────────────────────────────────────────── */
+.section-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.75rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #915EFF;
+}
+
+/* ─── Neon border glow ──────────────────────────────────────── */
+.border-glow {
+  border: 1px solid rgba(145, 94, 255, 0.4);
+  box-shadow: 0 0 20px rgba(145, 94, 255, 0.15), inset 0 0 20px rgba(145, 94, 255, 0.05);
+}
+
+.border-glow-cyan {
+  border: 1px solid rgba(0, 217, 255, 0.35);
+  box-shadow: 0 0 20px rgba(0, 217, 255, 0.12), inset 0 0 20px rgba(0, 217, 255, 0.05);
+}
+
+/* ─── Button styles ─────────────────────────────────────────── */
+.btn-primary {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.75rem;
+  background: linear-gradient(135deg, #915EFF, #7B4FD8);
+  color: white;
+  font-weight: 600;
+  font-size: 0.9rem;
+  border-radius: 9999px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 0 20px rgba(145, 94, 255, 0.4);
+  text-decoration: none;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0 35px rgba(145, 94, 255, 0.6);
+}
+
+.btn-secondary {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.75rem;
+  background: transparent;
+  color: white;
+  font-weight: 600;
+  font-size: 0.9rem;
+  border-radius: 9999px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-decoration: none;
+}
+
+.btn-secondary:hover {
+  border-color: #915EFF;
+  box-shadow: 0 0 20px rgba(145, 94, 255, 0.3);
+  transform: translateY(-2px);
+}
+
+/* ─── Skill chip ────────────────────────────────────────────── */
+.skill-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.35rem 0.85rem;
+  border-radius: 9999px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  font-family: 'JetBrains Mono', monospace;
+  background: rgba(145, 94, 255, 0.12);
+  border: 1px solid rgba(145, 94, 255, 0.3);
+  color: #c4b5fd;
+  transition: all 0.25s ease;
+  white-space: nowrap;
+}
+
+.skill-chip:hover {
+  background: rgba(145, 94, 255, 0.25);
+  border-color: #915EFF;
+  box-shadow: 0 0 15px rgba(145, 94, 255, 0.35);
+  color: #e9d5ff;
+  transform: translateY(-1px);
+}
+
+.skill-chip-cyan {
+  background: rgba(0, 217, 255, 0.1);
+  border: 1px solid rgba(0, 217, 255, 0.25);
+  color: #67e8f9;
+}
+
+.skill-chip-cyan:hover {
+  background: rgba(0, 217, 255, 0.2);
+  border-color: #00d9ff;
+  box-shadow: 0 0 15px rgba(0, 217, 255, 0.3);
+  color: #a5f3fc;
+}
+
+/* ─── Timeline line ─────────────────────────────────────────── */
+.timeline-line {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: linear-gradient(to bottom, #915EFF, #00d9ff, transparent);
+}
+
+/* ─── Noise overlay ─────────────────────────────────────────── */
+.noise-overlay {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.025;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+}
+
+/* ─── 3D tilt card ──────────────────────────────────────────── */
+.tilt-card {
+  transform-style: preserve-3d;
+  transition: transform 0.1s ease;
+}
+
+/* ─── Gradient blob backgrounds ────────────────────────────── */
+.blob-purple {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  background: rgba(145, 94, 255, 0.18);
+  pointer-events: none;
+}
+
+.blob-cyan {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  background: rgba(0, 217, 255, 0.12);
+  pointer-events: none;
+}
+
+/* ─── Holographic scan line ─────────────────────────────────── */
+.scan-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(to right, transparent, rgba(0, 217, 255, 0.6), transparent);
+  animation: scan 3s linear infinite;
+  pointer-events: none;
+}
+
+/* ─── Metric highlight ──────────────────────────────────────── */
+.metric {
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 700;
+  background: linear-gradient(135deg, #915EFF, #00d9ff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ─── Canvas containers ─────────────────────────────────────── */
+.canvas-container {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+/* ─── Custom selection ──────────────────────────────────────── */
+::selection {
+  background: rgba(145, 94, 255, 0.35);
+  color: white;
+}
+
+/* ─── Focus visible ─────────────────────────────────────────── */
+:focus-visible {
+  outline: 2px solid #915EFF;
+  outline-offset: 3px;
+}
