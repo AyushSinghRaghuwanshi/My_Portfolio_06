@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion'
-import { SOCIAL, NAV_LINKS, CV_URL } from '../utils/constants'
+import { SOCIAL, NAV_LINKS } from '../utils/constants'
 
 export default function Footer() {
   const year = new Date().getFullYear()
@@ -55,11 +55,6 @@ export default function Footer() {
                   </button>
                 </li>
               ))}
-              <li>
-                <a href={CV_URL} download className="text-sm text-muted hover:text-white transition-colors">
-                  Download CV
-                </a>
-              </li>
             </ul>
           </div>
 
