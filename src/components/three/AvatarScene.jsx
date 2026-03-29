@@ -134,23 +134,38 @@ function DataStream({ x, z, count = 18, speed = 0.42, color }) {
   )
 }
 
-/* ── Pulsing ambient light ──────────────────────────────────── */
+/* ── Lights ─────────────────────────────────────────────────── */
 function Lights() {
-  const kRef = useRef()
+  const fillRef = useRef()
   useFrame(({ clock }) => {
-    if (kRef.current) kRef.current.intensity = 1.4 + Math.sin(clock.getElapsedTime() * 1.4) * 0.3
+    if (fillRef.current) fillRef.current.intensity = 0.45 + Math.sin(clock.getElapsedTime() * 1.4) * 0.08
   })
   return (
     <>
-      <ambientLight intensity={0.55} />
-      <pointLight ref={kRef} position={[2.5, 3, 2]}   color="#ffffff" intensity={1.4} />
-      <pointLight              position={[-2,  2, 2]}  color="#00d9ff" intensity={0.5} />
-      <pointLight              position={[0,  -2, 1]}  color="#915EFF" intensity={0.4} />
-      <spotLight
-        position={[0, 5, 3]}
-        angle={0.5} penumbra={0.8}
-        intensity={1.8} color="#ffe8cc"
+      <ambientLight intensity={0.50} />
+      {/* Key light — warm, front-right, casts shadows */}
+      <directionalLight
+        position={[2.5, 4.5, 3.5]}
+        intensity={2.0}
+        color="#fff5e8"
+        castShadow
+        shadow-mapSize-width={512}
+        shadow-mapSize-height={512}
+        shadow-camera-near={0.5}
+        shadow-camera-far={20}
+        shadow-camera-left={-3}
+        shadow-camera-right={3}
+        shadow-camera-top={3}
+        shadow-camera-bottom={-3}
       />
+      {/* Fill light — cool left */}
+      <pointLight ref={fillRef} position={[-2.5, 2, 2]} color="#c8d8ff" intensity={0.45} />
+      {/* Rim light — back purple */}
+      <pointLight position={[0, 1.5, -2]} color="#915EFF" intensity={0.55} />
+      {/* Ground bounce — warm bottom */}
+      <pointLight position={[0, -2, 1.5]} color="#ffe0a0" intensity={0.30} />
+      {/* Accent — blue for tablet glow spill */}
+      <pointLight position={[-1.2, 0.2, 1.5]} color="#2255ff" intensity={0.25} />
     </>
   )
 }
@@ -192,7 +207,8 @@ function Scene({ mousePos }) {
 export default function AvatarScene({ mousePos }) {
   return (
     <Canvas
-      camera={{ position: [0, 0, 5.5], fov: 42 }}
+      shadows
+      camera={{ position: [0, 0.5, 4.0], fov: 40 }}
       dpr={[1, 1.5]}
       gl={{ antialias: true, alpha: true, powerPreference: 'high-performance' }}
       style={{ background: 'transparent' }}
