@@ -192,7 +192,7 @@ function Scene({ mousePos }) {
 export default function AvatarScene({ mousePos }) {
   return (
     <Canvas
-      camera={{ position: [0, 0.3, 4.2], fov: 44 }}
+      camera={{ position: [0, 0, 5.5], fov: 42 }}
       dpr={[1, 1.5]}
       gl={{ antialias: true, alpha: true, powerPreference: 'high-performance' }}
       style={{ background: 'transparent' }}

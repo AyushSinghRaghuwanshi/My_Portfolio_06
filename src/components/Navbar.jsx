@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { NAV_LINKS, CV_URL } from '../utils/constants'
+import { NAV_LINKS } from '../utils/constants'
 
 export default function Navbar({ scrolled }) {
   const [mobileOpen, setMobileOpen] = useState(false)
@@ -87,16 +87,6 @@ export default function Navbar({ scrolled }) {
 
         {/* Desktop CTA */}
         <div className="hidden lg:flex items-center gap-3">
-          <a
-            href={CV_URL}
-            download
-            className="btn-secondary text-sm py-2 px-4"
-          >
-            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3M3 17V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
-            </svg>
-            CV
-          </a>
           <button
             onClick={() => handleNav('#contact')}
             className="btn-primary text-sm py-2 px-4"
@@ -140,9 +130,6 @@ export default function Navbar({ scrolled }) {
                 </button>
               ))}
               <div className="flex gap-2 mt-3 pt-3 border-t border-white/5">
-                <a href={CV_URL} download className="btn-secondary text-sm py-2 flex-1 justify-center">
-                  Download CV
-                </a>
                 <button onClick={() => handleNav('#contact')} className="btn-primary text-sm py-2 flex-1 justify-center">
                   Hire Me
                 </button>

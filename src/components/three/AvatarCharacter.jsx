@@ -1,181 +1,108 @@
 /**
- * AvatarCharacter.jsx
- * Fully animated 3D cartoon character built from Three.js primitives.
+ * AvatarCharacter.jsx — proper cartoon human figure
  *
+ * Full body: head · neck · torso · two arms · two legs · feet
  * Animations:
- *  - Floating  : whole body bobs up/down continuously
- *  - Breathing : subtle chest scale pulse
- *  - Head track: head rotates to follow the mouse cursor
- *  - Eye track : pupils shift toward the cursor inside the eye
- *  - Blink     : eyelids close/open periodically (every 2-4 s)
- *  - Wave      : right arm raises + forearm waves; triggers on mount
- *                after 1 s and on every click
- *  - Idle sway : arms gently sway when not waving
- *
- * Style: cartoon — spiky brown hair, glasses, orange hoodie, light skin.
+ *   · Float     — gentle up/down bob
+ *   · Breathe   — subtle torso pulse
+ *   · Head look — head + eyes follow mouse
+ *   · Blink     — periodic eyelid close
+ *   · Wave      — auto on mount + on click:
+ *                 arm rises to side, elbow bends, hand oscillates
+ *   · Idle sway — small arms & body sway when not waving
  */
 
 import { useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
-import { Sphere, Torus, Capsule } from '@react-three/drei'
+import { Sphere, Torus } from '@react-three/drei'
 import * as THREE from 'three'
 
-const L = THREE.MathUtils.lerp   // shorthand
+const L = THREE.MathUtils.lerp
 
-// ─── Palette ──────────────────────────────────────────────────
 const C = {
-  skin:    '#f5c9a0',
-  skinD:   '#e0a070',
-  hair:    '#2e1f12',
-  glass:   '#1a0f06',
-  orange:  '#E07820',
-  orangeD: '#bf5e10',
-  dark:    '#111111',
-  white:   '#ffffff',
-  iris:    '#7a4520',
-  pupil:   '#0a0400',
-  smile:   '#c06035',
+  skin:   '#f5c9a0',
+  skinD:  '#e0a070',
+  hair:   '#2e1f12',
+  glass:  '#1a0f06',
+  hoodie: '#d96a12',
+  hoodieD:'#b05510',
+  jeans:  '#1e2f52',
+  shoe:   '#1a0f08',
+  white:  '#ffffff',
+  iris:   '#6a3c18',
+  pupil:  '#0a0400',
+  smile:  '#b85028',
+  blush:  '#f08070',
 }
 
-// Tiny helper: standard material shorthand
-const Std = ({ color, rough = 0.75, metal = 0, emissive, emissiveIntensity }) => (
+const M = ({ color, rough = 0.75, metal = 0, opacity, transparent }) => (
   <meshStandardMaterial
-    color={color}
-    roughness={rough}
-    metalness={metal}
-    emissive={emissive}
-    emissiveIntensity={emissiveIntensity}
+    color={color} roughness={rough} metalness={metal}
+    opacity={opacity ?? 1} transparent={transparent ?? false}
   />
 )
 
-/* ══════════════════════════════════════════════════════════════
-   HAIR  — base cap + 8 spiky protrusions (more voluminous)
-   ══════════════════════════════════════════════════════════════ */
+/* ── Hair ───────────────────────────────────────────────────── */
 function Hair() {
-  const spikes = [
-    { p: [0,     0.60,  0.04], r: [0,     0,     0    ], h: 0.32 },
-    { p: [0.20,  0.56,  0.06], r: [0.06,  0,     0.35 ], h: 0.26 },
-    { p: [-0.20, 0.56,  0.06], r: [0.06,  0,    -0.35 ], h: 0.26 },
-    { p: [0.10,  0.58, -0.04], r: [-0.14, 0,     0.16 ], h: 0.24 },
-    { p: [-0.10, 0.58, -0.04], r: [-0.14, 0,    -0.16 ], h: 0.24 },
-    { p: [0.34,  0.50,  0.02], r: [0.04,  0,     0.62 ], h: 0.22 },
-    { p: [-0.34, 0.50,  0.02], r: [0.04,  0,    -0.62 ], h: 0.22 },
-    { p: [0,     0.55, -0.18], r: [-0.40, 0,     0    ], h: 0.20 },
-  ]
   return (
     <group>
-      {/* Cap */}
-      <Sphere args={[0.52, 28, 16]} position={[0, 0.1, -0.02]}>
-        <Std color={C.hair} rough={0.95} />
-      </Sphere>
-      {/* Back volume */}
-      <Sphere args={[0.46, 20, 14]} position={[0, 0, -0.22]} scale={[1, 1.05, 0.7]}>
-        <Std color={C.hair} rough={0.95} />
-      </Sphere>
-      {spikes.map(({ p, r, h }, i) => (
+      <Sphere args={[0.345, 24, 16]} position={[0, 0.07, -0.02]}><M color={C.hair} rough={0.95}/></Sphere>
+      <Sphere args={[0.30,  18, 14]} position={[0, 0.02, -0.18]} scale={[1.1, 1, 0.65]}><M color={C.hair} rough={0.95}/></Sphere>
+      {[
+        { p:[0,    0.44, 0.04], r:[0,   0,  0   ], h:0.26 },
+        { p:[0.18, 0.42, 0.06], r:[0.0, 0,  0.30], h:0.22 },
+        { p:[-0.18,0.42, 0.06], r:[0.0, 0, -0.30], h:0.22 },
+        { p:[0.30, 0.36, 0.02], r:[0.0, 0,  0.58], h:0.18 },
+        { p:[-0.30,0.36, 0.02], r:[0.0, 0, -0.58], h:0.18 },
+        { p:[0,    0.40,-0.10], r:[-0.35,0, 0   ], h:0.16 },
+      ].map(({ p, r, h }, i) => (
         <mesh key={i} position={p} rotation={r}>
-          <capsuleGeometry args={[0.065, h, 4, 8]} />
-          <Std color={C.hair} rough={0.9} />
+          <capsuleGeometry args={[0.058, h, 4, 8]} />
+          <M color={C.hair} rough={0.9}/>
         </mesh>
       ))}
     </group>
   )
 }
 
-/* ══════════════════════════════════════════════════════════════
-   EYE  — white + iris + pupil (tracked) + lid (blinks)
-   ══════════════════════════════════════════════════════════════ */
-function Eye({ side, lidRef, pupilRef }) {
-  const x = side === 'L' ? -0.185 : 0.185
-  return (
-    <group position={[x, 0.05, 0.44]}>
-      {/* White sclera */}
-      <Sphere args={[0.115, 22, 18]}>
-        <Std color={C.white} rough={0.15} />
-      </Sphere>
-      {/* Iris */}
-      <Sphere args={[0.074, 16, 14]} position={[0, 0, 0.06]}>
-        <Std color={C.iris} />
-      </Sphere>
-      {/* Pupil — moves with cursor */}
-      <Sphere ref={pupilRef} args={[0.036, 10, 10]} position={[0, 0, 0.088]}>
-        <Std color={C.pupil} />
-      </Sphere>
-      {/* Specular highlight */}
-      <Sphere args={[0.017, 6, 6]} position={[0.026, 0.032, 0.104]}>
-        <meshStandardMaterial color={C.white} emissive={C.white} emissiveIntensity={1} />
-      </Sphere>
-      {/* Eyelid group — scaleY closes on blink */}
-      <group ref={lidRef}>
-        {/* Upper lid (skin-coloured half-dome that covers eye from top) */}
-        <mesh position={[0, 0.052, 0.01]}>
-          <sphereGeometry args={[0.105, 22, 10, 0, Math.PI * 2, 0, Math.PI / 2]} />
-          <Std color={C.skin} rough={0.8} />
-        </mesh>
-      </group>
-    </group>
-  )
-}
-
-/* ══════════════════════════════════════════════════════════════
-   GLASSES  — two lens rings + bridge + temples
-   ══════════════════════════════════════════════════════════════ */
+/* ── Glasses ────────────────────────────────────────────────── */
 function Glasses() {
+  const gm = <M color={C.glass} metal={0.7} rough={0.2}/>
   return (
     <group>
-      {/* Left lens */}
-      <Torus args={[0.112, 0.015, 8, 32]} position={[-0.185, 0.05, 0.462]}>
-        <Std color={C.glass} metal={0.7} rough={0.2} />
-      </Torus>
-      {/* Right lens */}
-      <Torus args={[0.112, 0.015, 8, 32]} position={[0.185, 0.05, 0.462]}>
-        <Std color={C.glass} metal={0.7} rough={0.2} />
-      </Torus>
-      {/* Bridge */}
-      <mesh position={[0, 0.05, 0.462]}>
-        <boxGeometry args={[0.125, 0.014, 0.014]} />
-        <Std color={C.glass} metal={0.7} rough={0.2} />
-      </mesh>
-      {/* Left temple */}
-      <mesh position={[-0.37, 0.05, 0.37]} rotation={[0, -0.32, 0]}>
-        <boxGeometry args={[0.23, 0.012, 0.012]} />
-        <Std color={C.glass} metal={0.7} rough={0.2} />
-      </mesh>
-      {/* Right temple */}
-      <mesh position={[0.37, 0.05, 0.37]} rotation={[0, 0.32, 0]}>
-        <boxGeometry args={[0.23, 0.012, 0.012]} />
-        <Std color={C.glass} metal={0.7} rough={0.2} />
-      </mesh>
+      <Torus args={[0.095, 0.013, 8, 28]} position={[-0.155, 0.02, 0.305]}>{gm}</Torus>
+      <Torus args={[0.095, 0.013, 8, 28]} position={[ 0.155, 0.02, 0.305]}>{gm}</Torus>
+      <mesh position={[0, 0.02, 0.306]}><boxGeometry args={[0.10, 0.011, 0.011]}/>{gm}</mesh>
+      <mesh position={[-0.31, 0.02, 0.265]} rotation={[0,-0.28, 0]}><boxGeometry args={[0.18, 0.010, 0.010]}/>{gm}</mesh>
+      <mesh position={[ 0.31, 0.02, 0.265]} rotation={[0, 0.28, 0]}><boxGeometry args={[0.18, 0.010, 0.010]}/>{gm}</mesh>
     </group>
   )
 }
 
-/* ══════════════════════════════════════════════════════════════
-   ARM  — shoulder pivot → upper arm → elbow pivot → lower arm + hand
-   ══════════════════════════════════════════════════════════════ */
+/* ── Arm (shoulder-pivot → upper arm → elbow-pivot → forearm+hand) ── */
 function Arm({ side, upperRef, lowerRef }) {
-  const sx   = side === 'R' ? 0.52 : -0.52
-  const flip = side === 'R' ? -1 : 1
+  const sx   = side === 'R' ? 0.39 : -0.39
+  const idle = side === 'R' ? 0.18 : -0.18   // idle outward rotation
   return (
-    <group position={[sx, 0.06, 0]}>
-      {/* Shoulder joint — upperRef rotates here */}
-      <group ref={upperRef} rotation={[0, 0, flip * 0.44]}>
+    <group position={[sx, 0.52, 0]}>
+      {/* Shoulder joint */}
+      <group ref={upperRef} rotation={[0, 0, idle]}>
         {/* Upper arm */}
-        <mesh position={[0, -0.22, 0]}>
-          <capsuleGeometry args={[0.095, 0.30, 6, 12]} />
-          <Std color={C.orange} rough={0.85} />
+        <mesh position={[0, -0.20, 0]}>
+          <capsuleGeometry args={[0.085, 0.26, 6, 10]}/>
+          <M color={C.hoodie} rough={0.85}/>
         </mesh>
-        {/* Elbow pivot → lowerRef (only used for right arm wave) */}
-        <group position={[0, -0.40, 0]}>
-          <group ref={lowerRef} rotation={[0, 0, flip * -0.30]}>
+        {/* Elbow joint */}
+        <group position={[0, -0.38, 0]}>
+          <group ref={lowerRef} rotation={[0, 0, side === 'R' ? 0.12 : -0.12]}>
             {/* Forearm */}
-            <mesh position={[0, -0.19, 0]}>
-              <capsuleGeometry args={[0.082, 0.26, 6, 12]} />
-              <Std color={C.skin} rough={0.7} />
+            <mesh position={[0, -0.18, 0]}>
+              <capsuleGeometry args={[0.073, 0.23, 6, 10]}/>
+              <M color={C.skin} rough={0.7}/>
             </mesh>
             {/* Hand */}
-            <Sphere args={[0.095, 14, 12]} position={[0, -0.34, 0]}>
-              <Std color={C.skin} rough={0.7} />
+            <Sphere args={[0.082, 12, 10]} position={[0, -0.33, 0]}>
+              <M color={C.skin} rough={0.7}/>
             </Sphere>
           </group>
         </group>
@@ -184,267 +111,257 @@ function Arm({ side, upperRef, lowerRef }) {
   )
 }
 
-/* ══════════════════════════════════════════════════════════════
-   MAIN CHARACTER
-   ══════════════════════════════════════════════════════════════ */
+/* ── Leg (hip-pivot → upper leg → knee-pivot → shin + foot) ── */
+function Leg({ side }) {
+  const sx      = side === 'R' ?  0.15 : -0.15
+  const footOut = side === 'R' ?  0.12 : -0.12
+  return (
+    <group position={[sx, 0.00, 0]}>
+      {/* Upper leg / thigh */}
+      <mesh position={[0, -0.20, 0]}>
+        <capsuleGeometry args={[0.10, 0.26, 6, 12]}/>
+        <M color={C.jeans} rough={0.85}/>
+      </mesh>
+      {/* Knee */}
+      <group position={[0, -0.38, 0]}>
+        {/* Shin */}
+        <mesh position={[0, -0.20, 0]}>
+          <capsuleGeometry args={[0.087, 0.25, 6, 12]}/>
+          <M color={C.jeans} rough={0.85}/>
+        </mesh>
+        {/* Foot/shoe */}
+        <Sphere args={[0.10, 14, 10]} position={[footOut, -0.38, 0.06]} scale={[1.1, 0.55, 1.35]}>
+          <M color={C.shoe} rough={0.7}/>
+        </Sphere>
+      </group>
+    </group>
+  )
+}
+
+/* ── Main character ─────────────────────────────────────────── */
 export default function AvatarCharacter({ mousePos }) {
-  // Root / body refs
-  const rootRef   = useRef()
-  const bodyRef   = useRef()
-  const headRef   = useRef()
+  const rootRef    = useRef()
+  const bodyRef    = useRef()
+  const headRef    = useRef()
+  const lLidRef    = useRef()
+  const rLidRef    = useRef()
+  const lPupilRef  = useRef()
+  const rPupilRef  = useRef()
+  const rUpperRef  = useRef()
+  const rLowerRef  = useRef()
+  const lUpperRef  = useRef()
 
-  // Eye refs
-  const lLidRef   = useRef()
-  const rLidRef   = useRef()
-  const lPupilRef = useRef()
-  const rPupilRef = useRef()
-
-  // Arm refs
-  const rUpperRef = useRef()
-  const rLowerRef = useRef()
-  const lUpperRef = useRef()
-  const lLowerRef = useRef()
-
-  // Animation state
-  const blink = useRef({ active: false, t0: 0, next: 2.2 })
+  const blink = useRef({ active: false, t0: 0, next: 2.4 })
   const wave  = useRef({ active: false, t0: 0, booted: false })
 
-  // Expose click handler via group ref so the Canvas onClick can reach it
-  const triggerWave = (t) => {
-    wave.current.active = true
-    wave.current.t0 = t
-  }
+  const triggerWave = (t) => { wave.current.active = true; wave.current.t0 = t }
 
   useFrame(({ clock }) => {
-    const t = clock.getElapsedTime()
-    const mx = (mousePos?.current?.x ?? 0.5) - 0.5   // –0.5 → +0.5
+    const t  = clock.getElapsedTime()
+    const mx = (mousePos?.current?.x ?? 0.5) - 0.5
     const my = (mousePos?.current?.y ?? 0.5) - 0.5
 
-    /* ── 1. Float ── */
-    if (rootRef.current) {
-      rootRef.current.position.y = Math.sin(t * 0.72) * 0.09
-    }
+    /* 1. Float */
+    if (rootRef.current) rootRef.current.position.y = Math.sin(t * 0.7) * 0.07
 
-    /* ── 2. Breathe ── */
+    /* 2. Breathe */
     if (bodyRef.current) {
-      const s = 1 + Math.sin(t * 1.3) * 0.012
+      const s = 1 + Math.sin(t * 1.2) * 0.010
       bodyRef.current.scale.setScalar(s)
     }
 
-    /* ── 3. Head tracks mouse ── */
+    /* 3. Head tracking */
     if (headRef.current) {
-      headRef.current.rotation.y = L(headRef.current.rotation.y, mx * 0.5,  0.045)
-      headRef.current.rotation.x = L(headRef.current.rotation.x, my * -0.28, 0.045)
+      headRef.current.rotation.y = L(headRef.current.rotation.y, mx * 0.45,  0.04)
+      headRef.current.rotation.x = L(headRef.current.rotation.x, my * -0.25, 0.04)
     }
 
-    /* ── 4. Pupils track mouse ── */
-    const px = mx * 0.032
-    const py = -my * 0.024
-    if (lPupilRef.current) {
-      lPupilRef.current.position.x = L(lPupilRef.current.position.x, px, 0.07)
-      lPupilRef.current.position.y = L(lPupilRef.current.position.y, py, 0.07)
-    }
-    if (rPupilRef.current) {
-      rPupilRef.current.position.x = L(rPupilRef.current.position.x, px, 0.07)
-      rPupilRef.current.position.y = L(rPupilRef.current.position.y, py, 0.07)
-    }
+    /* 4. Pupil tracking */
+    const px = mx * 0.028, py = -my * 0.020
+    if (lPupilRef.current) { lPupilRef.current.position.x = L(lPupilRef.current.position.x, px, 0.07); lPupilRef.current.position.y = L(lPupilRef.current.position.y, py, 0.07) }
+    if (rPupilRef.current) { rPupilRef.current.position.x = L(rPupilRef.current.position.x, px, 0.07); rPupilRef.current.position.y = L(rPupilRef.current.position.y, py, 0.07) }
 
-    /* ── 5. Blink ── */
+    /* 5. Blink */
     if (!blink.current.active && t > blink.current.next) {
-      blink.current.active = true
-      blink.current.t0     = t
-      blink.current.next   = t + 1.8 + Math.random() * 3.2
+      blink.current.active = true; blink.current.t0 = t
+      blink.current.next   = t + 2 + Math.random() * 3.5
     }
     if (blink.current.active) {
-      const progress = (t - blink.current.t0) / 0.13   // 130 ms total
-      const raw = progress < 0.5 ? 1 - progress * 2 : (progress - 0.5) * 2
-      const sy  = Math.max(0.04, Math.min(1, raw))
-      // Lower the lid by rotating it (rx: 0=closed, -PI/2=open)
-      const rx  = (1 - sy) * (Math.PI / 2)  // 0 → half-pi as lid opens
+      const p  = (t - blink.current.t0) / 0.12
+      const sy = Math.max(0.04, p < 0.5 ? 1 - p * 2 : (p - 0.5) * 2)
+      const rx = (1 - sy) * (Math.PI / 2)
       if (lLidRef.current) lLidRef.current.rotation.x = rx
       if (rLidRef.current) rLidRef.current.rotation.x = rx
-      if (progress >= 1) {
+      if (p >= 1) {
         blink.current.active = false
         if (lLidRef.current) lLidRef.current.rotation.x = Math.PI / 2
         if (rLidRef.current) rLidRef.current.rotation.x = Math.PI / 2
       }
     }
 
-    /* ── 6. Auto-wave 1.2 s after mount ── */
-    if (!wave.current.booted && t > 1.2) {
-      wave.current.booted = true
-      triggerWave(t)
-    }
+    /* 6. Auto-wave once after 1s */
+    if (!wave.current.booted && t > 1.0) { wave.current.booted = true; triggerWave(t) }
 
-    /* ── 7. Wave animation ── */
+    /* 7. Wave animation
+         Phase 1 (0-0.5s): raise upper arm outward → rotation.z from 0.18 to 1.30
+         Phase 2 (0.4-4s):  bend forearm upward → rotation.z from 0.12 to -1.35,
+                            then oscillate ±0.42 at 6 Hz
+         Phase 3 (4s+):     lower arm back to idle
+    */
     if (wave.current.active) {
-      const wt      = t - wave.current.t0
-      const raising = Math.min(1, wt * 2.8)   // arm rises over ~0.35 s
+      const wt = t - wave.current.t0
 
-      if (wt < 4.2) {
-        // ① Raise upper arm out to the side — target -1.15 rad (~66° above rest)
+      if (wt < 4.5) {
+        const raise = Math.min(1, wt / 0.45)          // 0→1 over 0.45 s
+
+        // Raise upper arm out to the side (z: idle 0.18 → wave 1.28)
         if (rUpperRef.current) {
-          rUpperRef.current.rotation.z = L(rUpperRef.current.rotation.z, -1.15 * raising, 0.10)
-          rUpperRef.current.rotation.x = L(rUpperRef.current.rotation.x,  0.10 * raising, 0.08)
+          rUpperRef.current.rotation.z = L(rUpperRef.current.rotation.z, 1.28 * raise + 0.18 * (1 - raise), 0.10)
+          rUpperRef.current.rotation.x = L(rUpperRef.current.rotation.x, -0.08 * raise, 0.08)
         }
-        // ② Bend elbow so forearm points upward once arm is raised
-        //    then oscillate forearm left/right for the wave gesture
-        if (rLowerRef.current && wt > 0.3) {
-          const waveOsc = Math.sin(wt * 6.5) * 0.40 * raising  // hand waves
-          rLowerRef.current.rotation.z = L(rLowerRef.current.rotation.z, 1.10 * raising + waveOsc, 0.12)
+
+        // Bend elbow + wave hand (starts once arm is ~50% raised)
+        if (rLowerRef.current && wt > 0.22) {
+          const waveOsc = Math.sin(wt * 6.2) * 0.44 * raise
+          rLowerRef.current.rotation.z = L(rLowerRef.current.rotation.z, -1.35 * raise + 0.12 * (1 - raise) + waveOsc, 0.12)
         }
+
       } else {
-        // Lower arm back to natural idle position
+        // Lower back to idle
         if (rUpperRef.current) {
-          rUpperRef.current.rotation.z = L(rUpperRef.current.rotation.z, -0.44, 0.05)
-          rUpperRef.current.rotation.x = L(rUpperRef.current.rotation.x,  0,    0.05)
+          rUpperRef.current.rotation.z = L(rUpperRef.current.rotation.z, 0.18, 0.05)
+          rUpperRef.current.rotation.x = L(rUpperRef.current.rotation.x, 0,    0.05)
         }
-        if (rLowerRef.current) {
-          rLowerRef.current.rotation.z = L(rLowerRef.current.rotation.z, -0.30, 0.05)
-        }
-        if (wt > 6.0) wave.current.active = false
+        if (rLowerRef.current) rLowerRef.current.rotation.z = L(rLowerRef.current.rotation.z, 0.12, 0.05)
+        if (wt > 6.5) wave.current.active = false
       }
+
     } else {
-      /* Idle arm sway */
-      if (rUpperRef.current) {
-        rUpperRef.current.rotation.z = L(rUpperRef.current.rotation.z, -0.44 + Math.sin(t * 0.55) * 0.025, 0.03)
-      }
-      if (lUpperRef.current) {
-        lUpperRef.current.rotation.z = L(lUpperRef.current.rotation.z,  0.44 + Math.sin(t * 0.55 + 1.2) * 0.025, 0.03)
-      }
+      /* Idle sway */
+      if (rUpperRef.current) rUpperRef.current.rotation.z = L(rUpperRef.current.rotation.z, 0.18 + Math.sin(t * 0.5) * 0.022, 0.03)
+      if (lUpperRef.current) lUpperRef.current.rotation.z = L(lUpperRef.current.rotation.z,-0.18 - Math.sin(t * 0.5 + 1.1) * 0.022, 0.03)
     }
   })
+
+  const eye = (side) => {
+    const x = side === 'L' ? -0.155 : 0.155
+    const lidRef  = side === 'L' ? lLidRef  : rLidRef
+    const pupRef  = side === 'L' ? lPupilRef : rPupilRef
+    return (
+      <group position={[x, 0.02, 0.295]}>
+        {/* White */}
+        <Sphere args={[0.090, 20, 16]}><M color={C.white} rough={0.15}/></Sphere>
+        {/* Iris */}
+        <Sphere args={[0.057, 14, 12]} position={[0, 0, 0.048]}><M color={C.iris}/></Sphere>
+        {/* Pupil */}
+        <Sphere ref={pupRef} args={[0.034, 10, 10]} position={[0, 0, 0.080]}><M color={C.pupil}/></Sphere>
+        {/* Shine */}
+        <Sphere args={[0.015, 6, 6]} position={[0.022, 0.026, 0.097]}>
+          <meshStandardMaterial color={C.white} emissive={C.white} emissiveIntensity={0.9}/>
+        </Sphere>
+        {/* Eyelid — starts open (rotation.x = PI/2) */}
+        <group ref={lidRef} rotation={[Math.PI / 2, 0, 0]}>
+          <mesh><sphereGeometry args={[0.096, 20, 10, 0, Math.PI * 2, 0, Math.PI / 2]}/><M color={C.skin} rough={0.8}/></mesh>
+        </group>
+      </group>
+    )
+  }
 
   return (
     <group
       ref={rootRef}
-      position={[0, -0.2, 0]}
-      onClick={(e) => { e.stopPropagation(); triggerWave(e.timeStamp / 1000) }}
+      position={[0, -0.35, 0]}
+      onClick={(e) => { e.stopPropagation(); triggerWave(clock_t()) }}
     >
-      {/* ══ HEAD GROUP ══════════════════════════════════════ */}
-      <group ref={headRef} position={[0, 0.88, 0]}>
-
-        {/* Head sphere — slightly larger for cartoon friendliness */}
-        <Sphere args={[0.52, 36, 28]}>
-          <Std color={C.skin} rough={0.75} />
-        </Sphere>
-
-        {/* Cheek blush — soft pink spheres */}
-        <Sphere args={[0.13, 10, 10]} position={[-0.38, -0.06, 0.38]} scale={[1, 0.55, 0.4]}>
-          <meshStandardMaterial color="#f08080" transparent opacity={0.28} roughness={1} />
-        </Sphere>
-        <Sphere args={[0.13, 10, 10]} position={[ 0.38, -0.06, 0.38]} scale={[1, 0.55, 0.4]}>
-          <meshStandardMaterial color="#f08080" transparent opacity={0.28} roughness={1} />
-        </Sphere>
-
-        <Hair />
-
+      {/* ═══ HEAD ═══════════════════════════════════════════ */}
+      <group ref={headRef} position={[0, 1.48, 0]}>
+        {/* Face */}
+        <Sphere args={[0.33, 32, 24]}><M color={C.skin} rough={0.75}/></Sphere>
         {/* Ears */}
-        <Sphere args={[0.105, 14, 12]} position={[-0.50, 0.02, 0]} scale={[0.68, 1, 0.58]}>
-          <Std color={C.skin} />
+        <Sphere args={[0.085, 12, 10]} position={[-0.325, 0, 0]} scale={[0.60, 1.0, 0.55]}><M color={C.skin}/></Sphere>
+        <Sphere args={[0.085, 12, 10]} position={[ 0.325, 0, 0]} scale={[0.60, 1.0, 0.55]}><M color={C.skin}/></Sphere>
+        {/* Cheek blush */}
+        <Sphere args={[0.09, 8, 8]} position={[-0.22, -0.06, 0.26]} scale={[1, 0.5, 0.4]}>
+          <M color={C.blush} rough={1} opacity={0.30} transparent/>
         </Sphere>
-        <Sphere args={[0.105, 14, 12]} position={[ 0.50, 0.02, 0]} scale={[0.68, 1, 0.58]}>
-          <Std color={C.skin} />
+        <Sphere args={[0.09, 8, 8]} position={[ 0.22, -0.06, 0.26]} scale={[1, 0.5, 0.4]}>
+          <M color={C.blush} rough={1} opacity={0.30} transparent/>
         </Sphere>
+
+        <Hair/>
 
         {/* Eyebrows */}
-        <mesh position={[-0.185, 0.215, 0.455]} rotation={[0.05, 0, 0.18]}>
-          <capsuleGeometry args={[0.015, 0.13, 4, 8]} />
-          <Std color={C.hair} rough={0.9} />
-        </mesh>
-        <mesh position={[ 0.185, 0.215, 0.455]} rotation={[0.05, 0, -0.18]}>
-          <capsuleGeometry args={[0.015, 0.13, 4, 8]} />
-          <Std color={C.hair} rough={0.9} />
-        </mesh>
+        {[-1, 1].map(s => (
+          <mesh key={s} position={[s * 0.155, 0.165, 0.295]} rotation={[0.05, 0, -s * 0.14]}>
+            <capsuleGeometry args={[0.012, 0.105, 4, 8]}/>
+            <M color={C.hair} rough={0.9}/>
+          </mesh>
+        ))}
 
-        {/* Eyes — lids start open (rotation.x = PI/2) */}
-        <group>
-          {/* Left */}
-          <group position={[-0.185, 0.05, 0.44]}>
-            <Sphere args={[0.115, 22, 18]}><Std color={C.white} rough={0.15} /></Sphere>
-            <Sphere args={[0.074, 16, 14]} position={[0, 0, 0.06]}><Std color={C.iris} /></Sphere>
-            <Sphere ref={lPupilRef} args={[0.046, 10, 10]} position={[0, 0, 0.10]}>
-              <Std color={C.pupil} />
-            </Sphere>
-            <Sphere args={[0.016, 6, 6]} position={[0.026, 0.032, 0.102]}>
-              <meshStandardMaterial color={C.white} emissive={C.white} emissiveIntensity={0.9} />
-            </Sphere>
-            {/* Lid — starts open (rx = PI/2 = rotated up/away) */}
-            <group ref={lLidRef} rotation={[Math.PI / 2, 0, 0]} position={[0, 0, 0]}>
-              <mesh>
-                <sphereGeometry args={[0.122, 22, 10, 0, Math.PI * 2, 0, Math.PI / 2]} />
-                <Std color={C.skin} rough={0.8} />
-              </mesh>
-            </group>
-          </group>
+        {/* Eyes */}
+        {eye('L')}{eye('R')}
 
-          {/* Right */}
-          <group position={[0.185, 0.05, 0.44]}>
-            <Sphere args={[0.115, 22, 18]}><Std color={C.white} rough={0.15} /></Sphere>
-            <Sphere args={[0.074, 16, 14]} position={[0, 0, 0.06]}><Std color={C.iris} /></Sphere>
-            <Sphere ref={rPupilRef} args={[0.046, 10, 10]} position={[0, 0, 0.10]}>
-              <Std color={C.pupil} />
-            </Sphere>
-            <Sphere args={[0.016, 6, 6]} position={[0.026, 0.032, 0.102]}>
-              <meshStandardMaterial color={C.white} emissive={C.white} emissiveIntensity={0.9} />
-            </Sphere>
-            <group ref={rLidRef} rotation={[Math.PI / 2, 0, 0]} position={[0, 0, 0]}>
-              <mesh>
-                <sphereGeometry args={[0.122, 22, 10, 0, Math.PI * 2, 0, Math.PI / 2]} />
-                <Std color={C.skin} rough={0.8} />
-              </mesh>
-            </group>
-          </group>
-        </group>
-
-        <Glasses />
+        <Glasses/>
 
         {/* Nose */}
-        <Sphere args={[0.042, 10, 10]} position={[0, -0.07, 0.49]} scale={[1, 0.82, 0.68]}>
-          <Std color={C.skinD} />
-        </Sphere>
+        <Sphere args={[0.034, 8, 8]} position={[0, -0.065, 0.32]} scale={[1, 0.80, 0.62]}><M color={C.skinD}/></Sphere>
 
-        {/* Smile — arc of torus */}
-        <mesh position={[0, -0.20, 0.468]} rotation={[0, 0, Math.PI]}>
-          <torusGeometry args={[0.120, 0.020, 6, 24, Math.PI * 0.88]} />
-          <Std color={C.smile} rough={0.8} />
+        {/* Smile */}
+        <mesh position={[0, -0.155, 0.300]} rotation={[0, 0, Math.PI]}>
+          <torusGeometry args={[0.094, 0.016, 6, 22, Math.PI * 0.85]}/>
+          <M color={C.smile} rough={0.8}/>
         </mesh>
       </group>
 
-      {/* ══ NECK ════════════════════════════════════════════ */}
-      <mesh position={[0, 0.28, 0]}>
-        <capsuleGeometry args={[0.10, 0.22, 6, 12]} />
-        <Std color={C.skin} rough={0.7} />
+      {/* ═══ NECK ════════════════════════════════════════════ */}
+      <mesh position={[0, 1.05, 0]}>
+        <capsuleGeometry args={[0.088, 0.18, 6, 10]}/>
+        <M color={C.skin} rough={0.7}/>
       </mesh>
 
-      {/* ══ TORSO ═══════════════════════════════════════════ */}
+      {/* ═══ TORSO ═══════════════════════════════════════════ */}
       <group ref={bodyRef}>
-        {/* Main hoodie body */}
-        <mesh position={[0, -0.10, 0]}>
-          <capsuleGeometry args={[0.41, 0.55, 8, 16]} />
-          <Std color={C.orange} rough={0.85} />
+        {/* Hoodie body */}
+        <mesh position={[0, 0.60, 0]}>
+          <capsuleGeometry args={[0.28, 0.58, 8, 14]}/>
+          <M color={C.hoodie} rough={0.85}/>
         </mesh>
-        {/* Zipper line */}
-        <mesh position={[0, -0.10, 0.40]}>
-          <boxGeometry args={[0.016, 0.58, 0.01]} />
-          <Std color={C.orangeD} rough={0.9} />
+        {/* Collar */}
+        <mesh position={[0, 0.94, 0.22]}>
+          <capsuleGeometry args={[0.10, 0.03, 4, 8]}/>
+          <M color="#1a1a1a" rough={0.9}/>
         </mesh>
-        {/* Collar dark inner */}
-        <mesh position={[0, 0.24, 0.31]}>
-          <capsuleGeometry args={[0.12, 0.04, 4, 8]} />
-          <Std color={C.dark} rough={0.9} />
+        {/* Zipper */}
+        <mesh position={[0, 0.62, 0.27]}>
+          <boxGeometry args={[0.013, 0.52, 0.008]}/>
+          <M color={C.hoodieD} rough={0.9}/>
         </mesh>
-        {/* Hoodie front pocket */}
-        <mesh position={[0, -0.28, 0.39]}>
-          <boxGeometry args={[0.30, 0.14, 0.012]} />
-          <Std color={C.orangeD} rough={0.85} />
+        {/* Pocket */}
+        <mesh position={[0, 0.43, 0.27]}>
+          <boxGeometry args={[0.22, 0.11, 0.010]}/>
+          <M color={C.hoodieD} rough={0.85}/>
+        </mesh>
+        {/* Hip/waist join */}
+        <mesh position={[0, 0.26, 0]}>
+          <capsuleGeometry args={[0.24, 0.06, 6, 12]}/>
+          <M color={C.jeans} rough={0.85}/>
         </mesh>
       </group>
 
-      {/* ══ ARMS ════════════════════════════════════════════ */}
-      <Arm side="R" upperRef={rUpperRef} lowerRef={rLowerRef} />
-      <Arm side="L" upperRef={lUpperRef} lowerRef={lLowerRef} />
+      {/* ═══ ARMS ════════════════════════════════════════════ */}
+      <Arm side="R" upperRef={rUpperRef} lowerRef={rLowerRef}/>
+      <Arm side="L" upperRef={lUpperRef} lowerRef={null}/>
+
+      {/* ═══ LEGS ════════════════════════════════════════════ */}
+      <Leg side="R"/>
+      <Leg side="L"/>
 
     </group>
   )
 }
+
+// tiny helper so onClick can pass a real timestamp
+let _t = 0
+function clock_t() { return _t }
+// This is updated inside AvatarScene via the exported ref
+export function updateClockT(t) { _t = t }
